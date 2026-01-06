@@ -32,7 +32,7 @@
   },
   "runArgs": [
     "--name=taiga-html-editor-dev",
-    "--hostname=dev-taiga-front-next",
+    "--hostname=dev-taiga-html-editor",
     "--cap-drop=ALL"
   ],
   "capAdd": [
@@ -40,7 +40,7 @@
   ],
   "init": true,
   "shutdownAction": "stopContainer",
-  "name": "taiga-front-next-dev",
+  "name": "taiga-html-editor-dev",
   "updateRemoteUserUID": true,
   "features": {},
   "customizations": {
@@ -104,8 +104,8 @@
     }
   },
   "postCreateCommand": {},
-  "workspaceMount": "type=bind,source=${localWorkspaceFolder},destination=/workspaces/taiga-front-next",
-  "workspaceFolder": "/workspaces/taiga-front-next",
+  "workspaceMount": "type=bind,source=${localWorkspaceFolder},destination=/workspaces/taiga-html-editor",
+  "workspaceFolder": "/workspaces/taiga-html-editor",
   "forwardPorts": [],
   "portsAttributes": {
     "4200": {
