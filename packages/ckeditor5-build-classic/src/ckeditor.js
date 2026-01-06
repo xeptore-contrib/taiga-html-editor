@@ -45,6 +45,7 @@ import AttachFile from '../plugins/attach-file';
 
 import TextPartLanguage from '@ckeditor/ckeditor5-language/src/textpartlanguage';
 import Bdi from '@ckeditor/ckeditor5-bdi/src/bdi';
+import TextDirection from '@ckeditor/ckeditor5-text-direction/src/textdirection';
 
 // import '../theme/styles.css'
 
@@ -87,7 +88,8 @@ ClassicEditor.builtinPlugins = [
 	ImageInsert,
 	LinkImage,
 	TextPartLanguage,
-	Bdi
+	Bdi,
+	TextDirection
 ];
 
 // Editor configuration.
@@ -107,6 +109,9 @@ ClassicEditor.defaultConfig = {
 			'bulletedList',
 			'numberedList',
 			'alignment',
+			'|',
+			'textDirectionLtr',
+			'textDirectionRtl',
 			'|',
 			'imageInsert',
 			'blockQuote',
