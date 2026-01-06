@@ -1,0 +1,122 @@
+{
+  "build": {
+    "dockerfile": "./Dockerfile",
+    "context": ".",
+    "options": [
+      "--pull",
+      "--progress=plain"
+    ],
+    "args": {
+      "USER_UID": "1000",
+      "USER_GID": "1000",
+      "GIT_VERSION": "2.52.0",
+      "DUST_VERSION": "v1.2.3",
+      "DUST_SHA256_AMD64": "f6a590a958a7fd1529fea7ae99b36be10158aa3a0ec0d686d83cc0ee89e9a142",
+      "DUST_SHA256_ARM64": "b6b78d8874635c18e651d69d95618f9e1eb9ecabcfc49338bc0f06ed43c7837a",
+      "BAT_VERSION": "v0.26.1",
+      "BAT_SHA256_AMD64": "726f04c8f576a7fd18b7634f1bbf2f915c43494c1c0f013baa3287edb0d5a2a3",
+      "BAT_SHA256_ARM64": "422eb73e11c854fddd99f5ca8461c2f1d6e6dce0a2a8c3d5daade5ffcb6564aa",
+      "YQ_VERSION": "v4.50.1",
+      "YQ_SHA_AMD64": "c7a1278e6bbc4924f41b56db838086c39d13ee25dcb22089e7fbf16ac901f0d4",
+      "YQ_SHA_ARM64": "cf0a663d8e4e00bb61507c5237b95b45a6aaa1fbedac77f4dc8abdadd5e2b745",
+      "JQ_VERSION": "1.8.1",
+      "JQ_SHA256_AMD64": "020468de7539ce70ef1bceaf7cde2e8c4f2ca6c3afb84642aabc5c97d9fc2a0d",
+      "JQ_SHA256_ARM64": "6bc62f25981328edd3cfcfe6fe51b073f2d7e7710d7ef7fcdac28d4e384fc3d4",
+      "EZA_VERSION": "v0.23.4",
+      "EZA_SHA256_AMD64": "0a1c72faefcb511b08b1b8470aedf4a6a3a94c4d56f8f65da3cb7d8c5de051f1",
+      "EZA_SHA256_ARM64": "366e8430225f9955c3dc659b452150c169894833ccfef455e01765e265a3edda",
+      "NODE_VERSION": "v16.20.2",
+      "OMZ_COMMIT": "a79b37b95461ea2be32578957473375954ab31ff",
+      "ZSH_AUTOSUGGESTIONS_COMMIT": "85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5"
+    }
+  },
+  "runArgs": [
+    "--name=taiga-html-editor-dev",
+    "--hostname=dev-taiga-front-next",
+    "--cap-drop=ALL"
+  ],
+  "capAdd": [
+    "CHOWN"
+  ],
+  "init": true,
+  "shutdownAction": "stopContainer",
+  "name": "taiga-front-next-dev",
+  "updateRemoteUserUID": true,
+  "features": {},
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "cSpell.enabled": true,
+        "git.confirmSync": false,
+        "git.enableSmartCommit": false,
+        "git.autorefresh": true,
+        "git.openRepositoryInParentFolders": "never",
+        "search.followSymlinks": false,
+        "search.useIgnoreFiles": true,
+        "search.exclude": {
+          "**/node_modules": true,
+          "**/dist": true,
+          "**/build": true,
+          "**/.git": true
+        },
+        "files.watcherExclude": {
+          "**/node_modules/**": true,
+          "**/dist/**": true,
+          "**/build/**": true
+        },
+        "eslint.run": "onType",
+        "problems.showCurrentInStatus": true,
+        "terminal.integrated.suggest.enabled": false,
+        "terminal.integrated.copyOnSelection": true,
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.scrollback": 20000,
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": false,
+        "editor.formatOnType": false,
+        "editor.defaultFormatter": null,
+        "scm.defaultViewMode": "tree",
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true,
+        "files.eol": "\n",
+        "files.autoSave": "off",
+        "files.encoding": "utf8",
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true,
+        "editor.detectIndentation": false,
+        "editor.renderWhitespace": "boundary",
+        "editor.renderControlCharacters": false,
+        "editor.minimap.enabled": false,
+        "git.detectSubmodules": false,
+        "git.autofetch": false,
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "typescript.enablePromptUseWorkspaceTsdk": true
+      },
+      "extensions": [
+        "anthropic.claude-code",
+        "amodio.tsl-problem-matcher",
+        "jeremyrajan.webpack",
+        "ms-azuretools.vscode-containers",
+        "ms-azuretools.vscode-docker",
+        "Orta.vscode-jest",
+        "streetsidesoftware.code-spell-checker-persian",
+        "streetsidesoftware.code-spell-checker"
+      ]
+    }
+  },
+  "postCreateCommand": {},
+  "workspaceMount": "type=bind,source=${localWorkspaceFolder},destination=/workspaces/taiga-front-next",
+  "workspaceFolder": "/workspaces/taiga-front-next",
+  "forwardPorts": [],
+  "portsAttributes": {
+    "4200": {
+      "label": "Dev Server",
+      "onAutoForward": "openBrowser",
+      "elevateIfNeeded": false,
+      "protocol": "http",
+      "requireLocalPort": true
+    }
+  },
+  "privileged": false,
+  "containerUser": "vscode",
+  "remoteUser": "vscode"
+}

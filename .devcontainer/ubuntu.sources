@@ -1,0 +1,31 @@
+Types: deb
+URIs: http://archive.ubuntu.com/ubuntu/
+Suites: questing questing-updates questing-backports
+Architectures: amd64
+Components: main universe restricted multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+## Ubuntu security updates. Aside from URIs and Suites,
+## this should mirror your choices in the previous section.
+Types: deb
+URIs: http://security.ubuntu.com/ubuntu/
+Suites: questing-security
+Architectures: amd64
+Components: main universe restricted multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+Types: deb
+URIs: http://ports.ubuntu.com/ubuntu-ports/
+Suites: questing questing-updates questing-backports
+Architectures: arm64
+Components: main universe restricted multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+## Ubuntu security updates. Aside from URIs and Suites,
+## this should mirror your choices in the previous section.
+Types: deb
+URIs: http://ports.ubuntu.com/ubuntu-ports/
+Suites: questing-security
+Architectures: arm64
+Components: main universe restricted multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
