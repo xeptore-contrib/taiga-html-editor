@@ -44,10 +44,11 @@ import MentionCustomization from '../plugins/mention-customization';
 import AttachFile from '../plugins/attach-file';
 
 import TextPartLanguage from '@ckeditor/ckeditor5-language/src/textpartlanguage';
+import Bdi from '@ckeditor/ckeditor5-bdi/src/bdi';
 
 // import '../theme/styles.css'
 
-export default class ClassicEditor extends ClassicEditorBase {}
+export default class ClassicEditor extends ClassicEditorBase { }
 
 // Plugins to include in the build.
 ClassicEditor.builtinPlugins = [
@@ -85,7 +86,8 @@ ClassicEditor.builtinPlugins = [
 	HorizontalLine,
 	ImageInsert,
 	LinkImage,
-	TextPartLanguage
+	TextPartLanguage,
+	Bdi
 ];
 
 // Editor configuration.
@@ -114,7 +116,8 @@ ClassicEditor.defaultConfig = {
 			'horizontalLine',
 			'undo',
 			'redo',
-			'textPartLanguage'
+			'textPartLanguage',
+			'bdi'
 		]
 	},
 	image: {
