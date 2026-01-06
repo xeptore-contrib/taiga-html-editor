@@ -59,14 +59,26 @@ export default class TextDirectionEditing extends Plugin {
 		conversion.for( 'downcast' ).attributeToAttribute( {
 			model: TEXT_DIRECTION,
 			view: direction => {
-				// Only add the dir attribute if it's rtl (ltr is the default)
+				// Support rtl, ltr, and auto values
 				if ( direction === 'rtl' ) {
 					return {
 						key: 'dir',
 						value: 'rtl'
 					};
 				}
-				// Return null for ltr to remove the attribute
+				if ( direction === 'ltr' ) {
+					return {
+						key: 'dir',
+						value: 'ltr'
+					};
+				}
+				if ( direction === 'auto' ) {
+					return {
+						key: 'dir',
+						value: 'auto'
+					};
+				}
+				// Return null to remove the attribute if no valid direction
 				return null;
 			}
 		} );
@@ -75,13 +87,14 @@ export default class TextDirectionEditing extends Plugin {
 		conversion.for( 'upcast' ).attributeToAttribute( {
 			view: {
 				key: 'dir',
-				value: /^(ltr|rtl)$/
+				value: /^(ltr|rtl|auto)$/
 			},
 			model: {
 				key: TEXT_DIRECTION,
 				value: viewElement => {
 					const direction = viewElement.getAttribute( 'dir' );
-					return direction === 'rtl' ? 'rtl' : 'ltr';
+					// Preserve the direction value as-is (ltr, rtl, or auto)
+					return direction;
 				}
 			}
 		} );

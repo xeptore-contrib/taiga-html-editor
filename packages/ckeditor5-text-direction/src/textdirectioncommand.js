@@ -34,7 +34,7 @@ export default class TextDirectionCommand extends Command {
 	 *
 	 * @fires execute
 	 * @param {Object} [options] Options for the executed command.
-	 * @param {String} [options.value] The value to apply. Should be 'ltr' or 'rtl'.
+	 * @param {String} [options.value] The value to apply. Should be 'ltr', 'rtl', or 'auto'.
 	 */
 	execute( options = {} ) {
 		const editor = this.editor;
@@ -49,16 +49,15 @@ export default class TextDirectionCommand extends Command {
 
 			const currentTextDirection = blocks[ 0 ].getAttribute( TEXT_DIRECTION );
 
-			// Remove the text direction attribute if:
-			// - it's the default (ltr)
-			// - it's already set to the same value
-			// - no value was provided
-			const removeTextDirection = value === 'ltr' || currentTextDirection === value || !value;
-
-			if ( removeTextDirection ) {
-				removeTextDirectionFromSelection( blocks, writer );
-			} else {
+			// If clicking the same button again, toggle back to 'auto'
+			if ( currentTextDirection === value ) {
+				setTextDirectionOnSelection( blocks, writer, 'auto' );
+			} else if ( value ) {
+				// Set the specified direction (ltr, rtl, or auto)
 				setTextDirectionOnSelection( blocks, writer, value );
+			} else {
+				// If no value provided, set to 'auto'
+				setTextDirectionOnSelection( blocks, writer, 'auto' );
 			}
 		} );
 	}
@@ -81,14 +80,5 @@ export default class TextDirectionCommand extends Command {
 function setTextDirectionOnSelection( blocks, writer, textDirection ) {
 	for ( const block of blocks ) {
 		writer.setAttribute( TEXT_DIRECTION, textDirection, block );
-	}
-}
-
-/**
- * Helper function that removes the text direction attribute from given blocks.
- */
-function removeTextDirectionFromSelection( blocks, writer ) {
-	for ( const block of blocks ) {
-		writer.removeAttribute( TEXT_DIRECTION, block );
 	}
 }
