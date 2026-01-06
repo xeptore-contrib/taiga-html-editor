@@ -87,9 +87,7 @@
         "editor.renderControlCharacters": false,
         "editor.minimap.enabled": false,
         "git.detectSubmodules": false,
-        "git.autofetch": false,
-        "typescript.tsdk": "node_modules/typescript/lib",
-        "typescript.enablePromptUseWorkspaceTsdk": true
+        "git.autofetch": false
       },
       "extensions": [
         "anthropic.claude-code",
