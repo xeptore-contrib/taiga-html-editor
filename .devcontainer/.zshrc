@@ -2,6 +2,7 @@ export ZSH="$HOME/.oh-my-zsh"
 
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ZSH_THEME="half-life"
+
 CASE_SENSITIVE="true"
 
 zstyle ':omz:update' mode reminder
