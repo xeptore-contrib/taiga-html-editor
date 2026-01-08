@@ -86,14 +86,20 @@ EOT
 
 WORKDIR /opt/git
 
-ARG GIT_VERSION=2.52.0
+# https://github.com/git/git/tags
+ARG GIT_VERSION
+# Calculated manually from the git source tarball using `sha512sum`
+ARG GIT_SHA512
 
 RUN <<EOT bash
   set -Eexuo pipefail
 
-  curl -sSfL --tlsv1.3 "https://github.com/git/git/archive/v${GIT_VERSION}.tar.gz" | tar -xzf -
+  curl -sSfLO --tlsv1.3 "https://github.com/git/git/archive/${GIT_VERSION}.tar.gz"
+  echo "${GIT_SHA512}  ${GIT_VERSION}.tar.gz" | sha512sum -c -
+  tar -xzf "${GIT_VERSION}.tar.gz"
+  rm "${GIT_VERSION}.tar.gz"
 
-  cd git-${GIT_VERSION}
+  cd git-${GIT_VERSION#v}
 
   make_opts=("prefix=/opt/git")
   make_opts+=("sysconfdir=/etc")
@@ -146,52 +152,13 @@ EOT
 FROM docker.io/library/ubuntu:24.04 AS devcontainer
 
 ENV DEBIAN_FRONTEND=noninteractive
-ARG USER_UID
-ARG USER_GID
-ARG TARGETARCH
-# https://github.com/bootandy/dust/releases
-ARG DUST_VERSION
-# dust-${DUST_VERSION}-aarch64-unknown-linux-gnu.tar.gz
-ARG DUST_SHA256_AMD64
-# dust-${DUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz
-ARG DUST_SHA256_ARM64
-# https://github.com/sharkdp/bat/releases
-ARG BAT_VERSION
-# bat-${BAT_VERSION}-x86_64-unknown-linux-gnu.tar.gz
-ARG BAT_SHA256_AMD64
-# bat-${BAT_VERSION}-aarch64-unknown-linux-gnu.tar.gz
-ARG BAT_SHA256_ARM64
-# https://github.com/mikefarah/yq/releases
-ARG YQ_VERSION
-# yq_linux_amd64
-ARG YQ_SHA_AMD64
-# yq_linux_arm64
-ARG YQ_SHA_ARM64
-# https://github.com/jqlang/jq/releases
-ARG JQ_VERSION
-# jq-linux-amd64
-ARG JQ_SHA256_AMD64
-# jq-linux-arm64
-ARG JQ_SHA256_ARM64
-# https://github.com/eza-community/eza/releases
-ARG EZA_VERSION
-# eza_x86_64-unknown-linux-gnu.tar.gz
-ARG EZA_SHA256_AMD64
-# eza_aarch64-unknown-linux-gnu.tar.gz
-ARG EZA_SHA256_ARM64
-# https://nodejs.org/en/download/archive/v12
-ARG NODE_VERSION
-# https://github.com/ohmyzsh/ohmyzsh/commits
-ARG OMZ_COMMIT
-# https://github.com/zsh-users/zsh-autosuggestions/commits
-ARG ZSH_AUTOSUGGESTIONS_COMMIT
 
 WORKDIR /root
 
+# --- System cleanup & base deps ---
 RUN <<EOT bash
   set -Eexuo pipefail
 
-  # --- System cleanup & base deps ---
   apt-get update
   apt-get upgrade -y --no-install-recommends
   apt-get install -y --no-install-recommends \
@@ -228,13 +195,19 @@ RUN <<EOT bash
     xz-utils \
     zip \
     zsh
+EOT
 
-  # --- Locale ---
+ARG USER_UID
+ARG USER_GID
+
+# --- Locale, CA certs, and user ---
+RUN <<EOT bash
+  set -Eexuo pipefail
+
   localedef -i en_US -c -f UTF-8 en_US.UTF-8
 
   update-ca-certificates
 
-  # --- User ---
   if [ '1000' = "${USER_UID}" ]; then
     usermod -l vscode ubuntu
     groupmod -n vscode ubuntu
@@ -245,15 +218,41 @@ RUN <<EOT bash
     groupadd --gid "${USER_GID}" vscode
     useradd -m -u "${USER_UID}" -g "${USER_GID}" -s /usr/bin/zsh vscode
   fi
+EOT
 
-  # --- zsh ---
+ENV LANG=en_US.utf8 LC_ALL=en_US.utf8
+
+# https://github.com/ohmyzsh/ohmyzsh/commits
+ARG OMZ_COMMIT
+# https://github.com/zsh-users/zsh-autosuggestions/commits
+ARG ZSH_AUTOSUGGESTIONS_COMMIT
+
+# --- zsh ---
+RUN <<EOT bash
+  set -Eexuo pipefail
+
   gosu vscode mkdir -p /home/vscode/.oh-my-zsh
   gosu vscode bash -c "curl -sSfL https://github.com/ohmyzsh/ohmyzsh/archive/${OMZ_COMMIT}.tar.gz | tar -xzf - --strip-components=1 -C /home/vscode/.oh-my-zsh"
   gosu vscode mkdir -p /home/vscode/.oh-my-zsh/custom/plugins/zsh-autosuggestions
   gosu vscode bash -c "curl -sSfL https://github.com/zsh-users/zsh-autosuggestions/archive/${ZSH_AUTOSUGGESTIONS_COMMIT}.tar.gz | tar -xzf - --strip-components=1 -C /home/vscode/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
   gosu vscode mkdir -p /home/vscode/.oh-my-zsh/completions
+EOT
 
-  # --- Install dust ---
+COPY --chown=vscode:vscode .zshrc /home/vscode/.zshrc
+
+# https://github.com/bootandy/dust/releases
+ARG DUST_VERSION
+# dust-${DUST_VERSION}-aarch64-unknown-linux-gnu.tar.gz
+ARG DUST_SHA256_AMD64
+# dust-${DUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz
+ARG DUST_SHA256_ARM64
+
+ARG TARGETARCH
+
+# --- Install dust ---
+RUN <<EOT bash
+  set -Eexuo pipefail
+
   case "${TARGETARCH}" in
     amd64) DUST_ARCH=x86_64 ;;
     arm64) DUST_ARCH=aarch64 ;;
@@ -267,10 +266,21 @@ RUN <<EOT bash
   esac;
   echo "\${DUST_SHA256}  /root/dust-${DUST_VERSION}-\${DUST_ARCH}-unknown-linux-gnu.tar.gz" | sha256sum -c -
   tar -xzf "/root/dust-${DUST_VERSION}-\${DUST_ARCH}-unknown-linux-gnu.tar.gz" --strip-components=1 -C /usr/local/bin/ "dust-${DUST_VERSION}-\${DUST_ARCH}-unknown-linux-gnu/dust"
-  gosu vscode dust --version
   rm "/root/dust-${DUST_VERSION}-\${DUST_ARCH}-unknown-linux-gnu.tar.gz"
+  gosu vscode dust --version
+EOT
 
-  # --- Install bat ---
+# https://github.com/sharkdp/bat/releases
+ARG BAT_VERSION
+# bat-${BAT_VERSION}-x86_64-unknown-linux-gnu.tar.gz
+ARG BAT_SHA256_AMD64
+# bat-${BAT_VERSION}-aarch64-unknown-linux-gnu.tar.gz
+ARG BAT_SHA256_ARM64
+
+# --- Install bat ---
+RUN <<EOT bash
+  set -Eexuo pipefail
+
   case "${TARGETARCH}" in
     amd64) BAT_ARCH=x86_64 ;;
     arm64) BAT_ARCH=aarch64 ;;
@@ -285,13 +295,53 @@ RUN <<EOT bash
   esac;
   echo "\${BAT_SHA256}  /root/bat-${BAT_VERSION}-\${BAT_ARCH}-unknown-linux-gnu.tar.gz" | sha256sum
   tar -xzf "/root/bat-${BAT_VERSION}-\${BAT_ARCH}-unknown-linux-gnu.tar.gz" --strip-components=1 -C /tmp/bat "bat-${BAT_VERSION}-\${BAT_ARCH}-unknown-linux-gnu"
+  rm "/root/bat-${BAT_VERSION}-\${BAT_ARCH}-unknown-linux-gnu.tar.gz"
   mv /tmp/bat/bat /usr/local/bin/bat
   gosu vscode cp /tmp/bat/autocomplete/bat.zsh /home/vscode/.oh-my-zsh/completions/_bat
   rm -rf /tmp/bat
   gosu vscode bat --version
-  rm "/root/bat-${BAT_VERSION}-\${BAT_ARCH}-unknown-linux-gnu.tar.gz"
+EOT
 
-  # --- Install jq ---
+# https://github.com/koalaman/shellcheck/releases
+ARG SHELLCHECK_VERSION
+# shellcheck-${SHELLCHECK_VERSION}.linux.x86_64.tar.gz
+ARG SHELLCHECK_SHA256_AMD64
+# shellcheck-${SHELLCHECK_VERSION}.linux.aarch64.tar.gz
+ARG SHELLCHECK_SHA256_ARM64
+
+# --- Install shellcheck ---
+RUN <<EOT bash
+  set -Eexuo pipefail
+
+  case "${TARGETARCH}" in
+    amd64) SHELLCHECK_ARCH=x86_64 ;;
+    arm64) SHELLCHECK_ARCH=aarch64 ;;
+    *) echo "Unsupported target platform architecture: ${TARGETARCH}" >&2; exit 16 ;;
+  esac;
+  curl -fsSLO --tlsv1.3 "https://github.com/koalaman/shellcheck/releases/download/${SHELLCHECK_VERSION}/shellcheck-${SHELLCHECK_VERSION}.linux.\${SHELLCHECK_ARCH}.tar.gz"
+  case "${TARGETARCH}" in
+    amd64) SHELLCHECK_SHA256=${SHELLCHECK_SHA256_AMD64} ;;
+    arm64) SHELLCHECK_SHA256=${SHELLCHECK_SHA256_ARM64} ;;
+    *) echo "Unsupported target platform architecture: ${TARGETARCH}" >&2; exit 16 ;;
+  esac;
+  echo "\${SHELLCHECK_SHA256}  /root/shellcheck-${SHELLCHECK_VERSION}.linux.\${SHELLCHECK_ARCH}.tar.gz" | sha256sum -c -
+  tar -xzf "/root/shellcheck-${SHELLCHECK_VERSION}.linux.\${SHELLCHECK_ARCH}.tar.gz" --strip-components=1 -C /usr/local/bin/ "shellcheck-${SHELLCHECK_VERSION}/shellcheck"
+  rm "/root/shellcheck-${SHELLCHECK_VERSION}.linux.\${SHELLCHECK_ARCH}.tar.gz"
+  chmod +x /usr/local/bin/shellcheck
+  gosu vscode shellcheck --version
+EOT
+
+# https://github.com/jqlang/jq/releases
+ARG JQ_VERSION
+# jq-linux-amd64
+ARG JQ_SHA256_AMD64
+# jq-linux-arm64
+ARG JQ_SHA256_ARM64
+
+# --- Install jq ---
+RUN <<EOT bash
+  set -Eexuo pipefail
+
   curl -fsSL --tlsv1.3 "https://github.com/jqlang/jq/releases/download/jq-${JQ_VERSION}/jq-linux-${TARGETARCH}" -o /usr/local/bin/jq
   case "${TARGETARCH}" in
     amd64) JQ_SHA256=${JQ_SHA256_AMD64} ;;
@@ -301,8 +351,19 @@ RUN <<EOT bash
   echo "\${JQ_SHA256}  /usr/local/bin/jq" | sha256sum
   chmod +x /usr/local/bin/jq
   gosu vscode jq --version
+EOT
 
-  # --- Install yq ---
+# https://github.com/mikefarah/yq/releases
+ARG YQ_VERSION
+# yq_linux_amd64
+ARG YQ_SHA_AMD64
+# yq_linux_arm64
+ARG YQ_SHA_ARM64
+
+# --- Install yq ---
+RUN <<EOT bash
+  set -Eexuo pipefail
+
   curl -fsSL --tlsv1.3 "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${TARGETARCH}" -o /usr/local/bin/yq
   case "${TARGETARCH}" in
     amd64) YQ_SHA256=${YQ_SHA_AMD64} ;;
@@ -312,8 +373,19 @@ RUN <<EOT bash
   echo "\${YQ_SHA256}  /usr/local/bin/yq" | sha256sum -c -
   chmod +x /usr/local/bin/yq
   gosu vscode yq --version
+EOT
 
-  # --- Install eza ---
+# https://github.com/eza-community/eza/releases
+ARG EZA_VERSION
+# eza_x86_64-unknown-linux-gnu.tar.gz
+ARG EZA_SHA256_AMD64
+# eza_aarch64-unknown-linux-gnu.tar.gz
+ARG EZA_SHA256_ARM64
+
+# --- Install eza ---
+RUN <<EOT bash
+  set -Eexuo pipefail
+
   case "${TARGETARCH}" in
     amd64) EZA_ARCH=x86_64 ;;
     arm64) EZA_ARCH=aarch64 ;;
@@ -327,11 +399,18 @@ RUN <<EOT bash
   esac;
   echo "\${EZA_SHA256}  /root/eza_\${EZA_ARCH}-unknown-linux-gnu.tar.gz" | sha256sum
   tar -xzf "/root/eza_\${EZA_ARCH}-unknown-linux-gnu.tar.gz" --strip-components=1 -C /usr/local/bin/ ./eza
-  gosu vscode eza --version
   rm "/root/eza_\${EZA_ARCH}-unknown-linux-gnu.tar.gz"
+  gosu vscode eza --version
   gosu vscode curl -fsSL --tlsv1.3 "https://raw.githubusercontent.com/eza-community/eza/refs/tags/${EZA_VERSION}/completions/zsh/_eza" -o /home/vscode/.oh-my-zsh/completions/_eza
+EOT
 
-  # --- Install Node ---
+# https://nodejs.org/en/download/archive/v16
+ARG NODE_VERSION
+
+# --- Install Node ---
+RUN <<EOT bash
+  set -Eexuo pipefail
+
   case "${TARGETARCH}" in
     amd64) NODE_ARCH=x64 ;;
     arm64) NODE_ARCH=arm64 ;;
@@ -349,19 +428,22 @@ RUN <<EOT bash
   gosu vscode node --version
   gosu vscode npm --version
   gosu vscode env --chdir=/home/vscode zsh -c 'npm completion zsh > /home/vscode/.oh-my-zsh/completions/_npm'
+EOT
 
-  # --- Cleanup ---
+# --- Cleanup ---
+RUN <<EOT bash
+  set -Eexuo pipefail
+
   apt-get purge -y gosu
   apt-get autoremove -y
   apt-get clean
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 EOT
 
-ENV LANG=en_US.utf8 LC_ALL=en_US.utf8 PATH="$PATH:/opt/node/bin:/opt/git/bin"
+USER vscode
 
-COPY --chown=vscode:vscode .zshrc /home/vscode/.zshrc
 COPY --chown=root:root --from=git-build /opt/git /opt/git
+ENV PATH="$PATH:/opt/node/bin:/opt/git/bin"
 RUN git --version
 
-USER vscode
-WORKDIR /workspaces/taiga-front-next
+WORKDIR /workspaces/taiga-html-editor

@@ -9,7 +9,8 @@
     "args": {
       "USER_UID": "1000",
       "USER_GID": "1000",
-      "GIT_VERSION": "2.52.0",
+      "GIT_VERSION": "v2.52.0",
+      "GIT_SHA512": "df14758f735525d996e8591bd81f4a59d47f41db93a088bc2afb591c82727746570c272e737fb600ea8b7f6ddee7170a4d29b8ee6bcd268c016ecd433d1cb9d9",
       "DUST_VERSION": "v1.2.3",
       "DUST_SHA256_AMD64": "f6a590a958a7fd1529fea7ae99b36be10158aa3a0ec0d686d83cc0ee89e9a142",
       "DUST_SHA256_ARM64": "b6b78d8874635c18e651d69d95618f9e1eb9ecabcfc49338bc0f06ed43c7837a",
@@ -25,6 +26,9 @@
       "EZA_VERSION": "v0.23.4",
       "EZA_SHA256_AMD64": "0a1c72faefcb511b08b1b8470aedf4a6a3a94c4d56f8f65da3cb7d8c5de051f1",
       "EZA_SHA256_ARM64": "366e8430225f9955c3dc659b452150c169894833ccfef455e01765e265a3edda",
+      "SHELLCHECK_VERSION": "v0.11.0",
+      "SHELLCHECK_SHA256_AMD64": "b7af85e41cc99489dcc21d66c6d5f3685138f06d34651e6d34b42ec6d54fe6f6",
+      "SHELLCHECK_SHA256_ARM64": "68a8133197a50beb8803f8d42f9908d1af1c5540d4bb05fdfca8c1fa47decefc",
       "NODE_VERSION": "v16.20.2",
       "OMZ_COMMIT": "a79b37b95461ea2be32578957473375954ab31ff",
       "ZSH_AUTOSUGGESTIONS_COMMIT": "85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5"
@@ -32,7 +36,7 @@
   },
   "runArgs": [
     "--name=taiga-html-editor-dev",
-    "--hostname=dev-taiga-html-editor",
+    "--hostname=taiga-html-editor-dev",
     "--cap-drop=ALL"
   ],
   "capAdd": [
@@ -90,14 +94,19 @@
         "git.autofetch": false
       },
       "extensions": [
-        "anthropic.claude-code",
         "amodio.tsl-problem-matcher",
+        "anthropic.claude-code",
+        "bruno-api-client.bruno",
+        "davidanson.vscode-markdownlint",
         "jeremyrajan.webpack",
         "ms-azuretools.vscode-containers",
         "ms-azuretools.vscode-docker",
+        "ms-dotnettools.csdevkit",
         "Orta.vscode-jest",
         "streetsidesoftware.code-spell-checker-persian",
-        "streetsidesoftware.code-spell-checker"
+        "streetsidesoftware.code-spell-checker",
+        "timonwong.shellcheck",
+        "yzhang.markdown-all-in-one"
       ]
     }
   },
