@@ -42,7 +42,6 @@ import Alignment from '@ckeditor/ckeditor5-alignment/src/alignment';
 
 import MentionCustomization from '../plugins/mention-customization';
 import AttachFile from '../plugins/attach-file';
-import AutoDir from '../plugins/auto-dir';
 
 import TextPartLanguage from '@ckeditor/ckeditor5-language/src/textpartlanguage';
 import Bdi from '@ckeditor/ckeditor5-bdi/src/bdi';
@@ -90,8 +89,7 @@ ClassicEditor.builtinPlugins = [
 	LinkImage,
 	TextPartLanguage,
 	Bdi,
-	TextDirection,
-	AutoDir
+	TextDirection
 ];
 
 // Editor configuration.
