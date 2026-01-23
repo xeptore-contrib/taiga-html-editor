@@ -443,7 +443,7 @@ EOT
 USER vscode
 
 COPY --chown=root:root --from=git-build /opt/git /opt/git
-ENV PATH="$PATH:/opt/node/bin:/opt/git/bin"
+ENV PATH="$PATH:/opt/node/bin:/opt/git/bin" PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 RUN git --version
 
 WORKDIR /workspaces/taiga-html-editor
