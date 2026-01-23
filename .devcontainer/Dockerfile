@@ -222,7 +222,7 @@ EOT
 
 ENV LANG=en_US.utf8 LC_ALL=en_US.utf8
 
-# https://github.com/ohmyzsh/ohmyzsh/commits
+# https://github.com/ohmyzsh/ohmyzsh/commits/master/
 ARG OMZ_COMMIT
 # https://github.com/zsh-users/zsh-autosuggestions/commits
 ARG ZSH_AUTOSUGGESTIONS_COMMIT
